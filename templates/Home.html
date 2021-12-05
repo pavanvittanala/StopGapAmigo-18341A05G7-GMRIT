@@ -60,8 +60,12 @@ button {
 }
 
    </style>
+
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+
 </head>
-<body>
+<body onload="alertUser()">
 
   
 <div class="wrapper">
@@ -69,10 +73,20 @@ button {
         <div class="header">
             <h1> Stop Gap Amigo </h1>
             <p>Borrower - Tender - Lender</p>      
-            <button type="button" onclick="window.location.href='./user';">Start Now</button>
+            <button type="button" onclick="window.location.href='./signing';">Start Now</button>
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+  function alertUser() {
+    qry = {{ qry |tojson }};
+    if(qry==1)
+    {
+      swal("You've logged out successfully","","success");
+    }
+  }
+</script>
 
 </body>
 </html>

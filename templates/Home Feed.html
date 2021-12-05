@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feed</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='./styles/style2.css') }}">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script type="text/javascript">
+      
+        $(function() {
+    $('button').click(function(e){
+      e.preventDefault();
+      console.log(this.id);
+      let val=this.id;
+
+        var log_data=[
+              {'unqid':val}
+           ];
+
+          $.ajax(
+            {
+              type: "POST",
+              url: "./register",
+              data : JSON.stringify(log_data),
+              contentType : "application/json",
+              dataType : 'json',
+              success : function(resp) {
+                console.log("Result-->>",resp);     
+              },
+              error : function(err) {
+                console.log("Error-->>",err);
+
+              }
+            }
+          );
+
+
+
+    });
+  });
+
+    </script>
+
+</head>
+<body>
+
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Stop Gap Amigo</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="./HomeFeed">Home</a>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Dashboard
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <li><a class="dropdown-item" href="./Borrows">Borrows</a></li>
+            <li><a class="dropdown-item" href="./Lends">Lends</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown" onclick="myFunc()">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Profile
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <li><a class="dropdown-item" ><b>Karmas: </b><span class=" badge bg-warning" id="karma_curr">0</span> </a></li>
+            <li><a class="dropdown-item" href="./logout">Logout</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<br/>
+<br/>
+{% block content %}
+
+{% endblock %}
+
+
+<script type="text/javascript">
+    
+    function myFunc(){
+      $.ajax(
+            {
+              type: "POST",
+              url: "./karma_curr",
+              data : JSON.stringify("karma"),
+              contentType : "application/json",
+              dataType : 'json',
+              success : function(resp) {
+                console.log("Result-->>",resp); 
+                document.getElementById('karma_curr').innerHTML=resp[1];    
+              },
+              error : function(err) {
+                console.log("Error-->>",err);
+
+              }
+            }
+          );
+
+    }
+
+  </script>
+
+</body>
+</html>
