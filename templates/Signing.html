@@ -7,78 +7,8 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='./styles/style1.css') }}">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-	<script type="text/javascript">
-		$(function() {
-		$('button').click(function(e){
-	    e.preventDefault();
-	    console.log(this.id);
-	    if (this.id == "1")
-	    {			
-	    			let nm=document.getElementsByName('name')[0].value;
-		    		let ml=document.getElementsByName('email')[0].value;
-					let ps=document.getElementsByName('passcode')[0].value;
-					let lc=document.getElementsByName('location')[0].value;
-					let ph=document.getElementsByName('phno')[0].value;
-					 
-					 var log_data=[
-					 {'email':ml},
-					 {'passcode':ps},
-					 {'name':nm},
-					 {'location':lc},
-					 {'mobile':ph}
-					 ];
-
-					$.ajax(
-						{
-							type: "POST",
-							url: "./register",
-							data : JSON.stringify(log_data),
-							contentType : "application/json",
-							dataType : 'json',
-							success : function(resp) {
-								console.log("Result-->>",resp); 	 	
-							},
-							error : function(err) {
-								console.log("Error-->>",err);
-
-							}
-						}
-					);
-
-	    }
-	    else{
-				    let ml=document.getElementsByName('email')[1].value;
-					let ps=document.getElementsByName('passcode')[1].value;
-					 console.log(ml,ps);
-					 
-					 var log_data=[
-					 {'email':ml},
-					 {'passcode':ps}
-					 ];
-
-					$.ajax(
-						{
-							type: "POST",
-							url: "./login",
-							data : JSON.stringify(log_data),
-							contentType : "application/json",
-							dataType : 'json',
-							success : function(resp) {
-								console.log("Result-->>",resp); 	 	
-							},
-							error : function(err) {
-								console.log("Error-->>",err);
-
-							}
-						}
-					);
-			}
-
-		});
-	});
-
-	</script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+	
 </head>
 <body >
 
@@ -135,17 +65,105 @@
 							contentType : "application/json",
 							dataType : 'json',
 							success : function(resp) {
-								console.log("Result-->>",resp); 	 	
+								console.log("Result-->>",resp); 
+								if(resp[1]=="exists")
+								{
+									swal("User already Exists","","error");
+								}	 	
 							},
 							error : function(err) {
 								console.log("Error-->>",err);
 
 							}
-							
+
 						}
 					);
 
 		}
+
+	</script>
+
+	<script type="text/javascript">
+		$(function() {
+		$('button').click(function(e){
+	    e.preventDefault();
+	    console.log(this.id);
+	    if (this.id == "1")
+	    {			
+	    			let nm=document.getElementsByName('name')[0].value;
+		    		let ml=document.getElementsByName('email')[0].value;
+					let ps=document.getElementsByName('passcode')[0].value;
+					let lc=document.getElementsByName('location')[0].value;
+					let ph=document.getElementsByName('phno')[0].value;
+					 
+					 var log_data=[
+					 {'name':nm},
+					 {'email':ml},
+					 {'passcode':ps},
+					 {'location':lc},
+					 {'mobile':ph}
+					 ];
+
+					$.ajax(
+						{
+							type: "POST",
+							url: "./register",
+							data : JSON.stringify(log_data),
+							contentType : "application/json",
+							dataType : 'json',
+							success : function(resp) {
+								console.log("Result-->>",resp); 
+								if(resp[1]=="exists")
+								{
+									swal("User already Exists","","error");
+								}	 		 	
+							},
+							error : function(err) {
+								console.log("Error-->>",err);
+
+							}
+						}
+					);
+
+	    }
+	    else{
+				    let ml=document.getElementsByName('email')[1].value;
+					let ps=document.getElementsByName('passcode')[1].value;
+					 console.log(ml,ps);
+					 
+					 var log_data=[
+					 {'email':ml},
+					 {'passcode':ps}
+					 ];
+
+					$.ajax(
+						{
+							type: "POST",
+							url: "./login",
+							data : JSON.stringify(log_data),
+							contentType : "application/json",
+							dataType : 'json',
+							success : function(resp) {
+								console.log("Result-->>",resp); 	
+								if(resp[1]=="success")
+								{
+									swal("Logging In ","","success");
+									window.location.href="HomeFeed";
+								}	
+								else{
+									swal("Logging In Failed","","error");
+								} 	 	
+							},
+							error : function(err) {
+								console.log("Error-->>",err);
+
+							}
+						}
+					);
+			}
+
+		});
+	});
 
 	</script>
 

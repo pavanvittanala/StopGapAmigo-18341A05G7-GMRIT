@@ -44,7 +44,7 @@ def login():
 		if data:
 			session['user']=data[0]['mailid']
 			session['karma']=data[0]['karma']
-			return jsonify([{1:"success"},{2:"saradha"}])
+			return jsonify({1:"success"})
 		else:
 			return jsonify({0:"failed"})
 @app.route('/logout')
@@ -84,12 +84,14 @@ def check():
 
 @app.route('/register',methods=['GET','POST'])
 def register():
-	if request.method == 'POST':
-		fullname=request.form['name']
-		mail=request.form['email']
-		passcode=request.form['password']
-		mobile=request.form['phno']
-		location=request.form['location']
+	if request.method == "POST":
+		dd=request.get_json()
+		print(dd)
+		fullname=dd[0]['name']
+		mail=dd[1]['email']
+		passcode=dd[2]['passcode']
+		location=dd[3]['location']
+		mobile=dd[4]['mobile']
 		cur=mysql.new_cursor(dictionary=True)
 		E="SELECT * from userdetails where mailid='{0}';".format(mail)
 		cur.execute(E)
@@ -113,15 +115,20 @@ def register():
 @app.route('/HomeFeed')
 def Home_feed():
 	cur=mysql.new_cursor(dictionary=True)
-	E="SELECT * from borrows;"
+	E="SELECT * from borrows where mailid!='{0}';".format(session['user'])
 	cur.execute(E)
 	data=cur.fetchall()
 	cur.close()
-	print(data)
+	# print(data)
 	return render_template('Feed.html', catalogue=data)
 
 
-
+@app.route("/ToBorrow")
+def toBorrow():
+	return render_template("ToBorrowForm.html")
+@app.route("/ToLend")
+def toLend():
+	return render_template("ToLendForm.html")
 
 
 @app.route('/Borrows')
@@ -206,16 +213,21 @@ def borrower():
 		location=request.form['location']
 		descp=request.form['description']
 		karmas=request.form['points']
+		E="SELECT * from borrows where mailid='{0}' and name='{1}';".format(mail,fullname)
+		cur=mysql.new_cursor(dictionary=True)
+		cur.execute(E)
+		data=cur.fetchall()
+		cur.close()
+		if data:
+			return jsonify({1:"exists"})
 		cur=mysql.new_cursor(dictionary=True)
 		E="INSERT INTO borrows (name,mailid,location,category,description,tender) VALUES ('{0}','{1}','{2}','{3}','{4}'.'{5}');".format(fullname,mail,location,category,descp,karma)
 		cur.execute(E)
 		mysql.connection.commit()
 		data=cur.fetchall()
 		print(data)
-		if data:
-			return jsonify({1:"success"})
-		else:
-			return jsonify({1:"failed"})
+		return jsonify({1:"success"})
+
 
 
 
@@ -227,28 +239,48 @@ def borrower():
 @app.route('/lending',methods=['POST'])
 def borrower_returned():
 	dt=request.get_json()
-	
-
-
-
-
-
-
-	name=request.form['name']
-	from_user=request.form['user_from']
-	to_user=request.form['user_to']
+	dt=dt[0]['unqid']
+	E="SELECT * from borrows where unqid='{0}'".format(dt)
 	cur=mysql.new_cursor(dictionary=True)
-	E="SELECT tender FROM borrows where name='{0}' and mailid='{1}'".format(name,to_user)
 	cur.execute(E)
 	data=cur.fetchall()
-	cur.close()
 	data=data[0]
-	karmas=data['tender']
+	cur.close()
+	if int(session['karma']) < int(data['tender']):
+		return jsonify({1:"failed"})
+	print("data",data)
+	E="INSERT INTO amigos (name,from_user,to_user,status,karmaoffered) VALUES ('{0}','{1}','{2}','{3}','{4}');".format(data['name'],session['user'],data['mailid'],"pending",data['tender'])
 	cur=mysql.new_cursor(dictionary=True)
-	E="INSERT INTO amigos (name,from_user,to_user,status,karmaoffered) VALUES ('{0}','{1}','{2}','{3}','{4}');".format(name,from_user,to_user,"pending",karmas)
 	cur.execute(E)
-	data=cur.fetchall()
-	print(data)
+	mysql.connection.commit()
+	cur.close()
+	karma_update= abs(int(session['karma']) + int(data['tender']))
+
+	E=f"select karma from userdetails where mailid='{ data['mailid'] }';"
+	cur=mysql.new_cursor(dictionary=True)
+	cur.execute(E)
+	kk=cur.fetchall()
+	# print("kk",kk)
+	kk=kk[0]['karma']
+	cur.close()
+
+	E=f"UPDATE userdetails SET karma = '{karma_update}' where mailid='{session['user']}';"
+	cur=mysql.new_cursor(dictionary=True)
+	cur.execute(E)
+	mysql.connection.commit()
+	# print("fetchhh",cur.fetchall())
+	cur.close()
+	print(data['tender'])
+
+	karma_update = abs(int(kk) - int(data['tender']))
+	print("kkkkkkkk",karma_update,data)
+	E=f"UPDATE userdetails SET karma = '{str(karma_update)}' where mailid='{data['mailid']}';"
+	cur=mysql.new_cursor(dictionary=True)
+	cur.execute(E)
+	mysql.connection.commit()
+	cur.close()
+
+	return jsonify({1:"success"})
 
 
 

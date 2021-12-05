@@ -9,41 +9,6 @@
   <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='./styles/style2.css') }}">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
-    <script type="text/javascript">
-      
-        $(function() {
-    $('button').click(function(e){
-      e.preventDefault();
-      console.log(this.id);
-      let val=this.id;
-
-        var log_data=[
-              {'unqid':val}
-           ];
-
-          $.ajax(
-            {
-              type: "POST",
-              url: "./register",
-              data : JSON.stringify(log_data),
-              contentType : "application/json",
-              dataType : 'json',
-              success : function(resp) {
-                console.log("Result-->>",resp);     
-              },
-              error : function(err) {
-                console.log("Error-->>",err);
-
-              }
-            }
-          );
-
-
-
-    });
-  });
-
-    </script>
 
 </head>
 <body>
@@ -70,6 +35,17 @@
             <li><a class="dropdown-item" href="./Lends">Lends</a></li>
           </ul>
         </li>
+
+          <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Post
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <li><a class="dropdown-item" href="./ToBorrow">To Borrow</a></li>
+            <li><a class="dropdown-item" href="./ToLend">To Lend</a></li>
+          </ul>
+        </li>
+
         <li class="nav-item dropdown" onclick="myFunc()">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Profile
@@ -77,6 +53,7 @@
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
             <li><a class="dropdown-item" ><b>Karmas: </b><span class=" badge bg-warning" id="karma_curr">0</span> </a></li>
             <li><a class="dropdown-item" href="./logout">Logout</a></li>
+
           </ul>
         </li>
       </ul>
