@@ -55,9 +55,13 @@
                 {
                 	swal("Olah,You helped your friend","","success");
                 }
-                else
+                else if(resp[1] == "failed1")
                 {
-                	swal("Oops,having less karma","","success");	
+                	swal("Oops,You having less karma","","success");	
+                }
+                else if(resp[1] == "failed2")
+                {
+                  swal("Ohh!! Borrower lack of karma","","info")
                 }
               },
               error : function(err) {

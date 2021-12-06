@@ -8,13 +8,15 @@
       <div class="card">
         <div class="card-body">
           <h3 class="card-title">{{ item["name"] }}</h3>
-          <hr/>
-          <p class="card-text">{{ item["description"] }}</p>
+          <hr/> 
           <div class="tags">
             <div class="info-tags">
-            <div><span class="badge bg-info"><b>Category:</b> {{ item["category"] }}</span>&nbsp;</div>
-            <div><span class="badge bg-info"><b>Location:</b> {{ item["location"] }}</span>&nbsp;</div>
+            <div><span class="badge bg-info"><b>Requested By :</b> {{ item.to_user }}</span>&nbsp;</div>
+            <div><span class="badge bg-info"><b>Lended By :</b> {{ item.from_user }}</span>&nbsp;</div>
+            <div><span class="badge bg-info"><b>Karmas Offered :</b> {{ item.karmaoffered }}</span></div>
             </div>
+            <div><button class="btn btn-primary lend-btn">Status</button></div>
+
           </div>
         </div>
       </div>

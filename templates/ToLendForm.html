@@ -19,7 +19,7 @@
 
 				  <div class="mb-3">
 				  <label for="productCategory" class="form-label">Category</label>
-				  <select class="form-select" id="preductCategory">
+				  <select class="form-select" id="productCategory">
 					  <option value="electronics">Electronics</option>
 					  <option value="fashion">Fashion</option>
 					  <option value="beverages">Beverages</option>
@@ -36,7 +36,7 @@
 				    <label for="location" class="form-label">Location</label>
 				    <input type="text" class="form-control" id="location">
 				  </div>
-				  <button type="submit" class="btn btn-primary">Submit</button>
+				  <button class="btn btn-primary" onclick()="function()">Submit</button>
 				</form>
 
 			</div>
@@ -49,7 +49,61 @@
 </div>
 
 
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+   <script type="text/javascript">
+      
+        $(function() {
+        	$('button').click(function(e){
+      e.preventDefault();
 
+        			let prod=document.getElementById('productName').value;
+					let categ=document.getElementById('productCategory').value;
+					let descp=document.getElementById('productDescription').value;
+					let loc=document.getElementById('location').value;
+					if(prod == "" || categ == "" || descp == "" || loc == "" || prod == " " || categ == " " || descp == " " || loc == " ")
+					{
+						swal("Data Invalid","Please Fill All The Fields, Amigo","error");
+					}
+					else
+					 {
+					 var prod_data=[
+					 {'prod' : prod,
+					 	'categ' : categ,
+					 	'descp' : descp,
+					 	'loc' : loc
+						}
+					 ];
 
+					$.ajax(
+						{
+							type: "POST",
+							url: "./lends",
+							data : JSON.stringify(prod_data),
+							contentType : "application/json",
+							dataType : 'json',
+							success : function(resp) {
+								console.log("Result-->>",resp); 
+								if(resp[1]=="prod_exists")
+								{
+									swal("This Offer From You Already Exists","","info").then(function() {
+   									 window.location = "./ToLend";});
+								}
+								else
+								{
+									swal("Offer Posted Successfully","","success").then(function() {
+   									 window.location = "./HomeFeed";});
+								}
+							},
+							error : function(err) {
+								console.log("Error-->>",err);
+
+							}
+						}
+					);
+				}
+				});
+        });
+
+    </script>
 
 {% endblock %}

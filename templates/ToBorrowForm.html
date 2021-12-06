@@ -19,12 +19,13 @@
 
 				  <div class="mb-3">
 				  <label for="productCategory" class="form-label">Category</label>
-				  <select class="form-select" id="preductCategory">
-					  <option value="electronics">Electronics</option>
-					  <option value="fashion">Fashion</option>
-					  <option value="beverages">Beverages</option>
-					  <option value="sports">Sports</option>
-					  <option value="others">Others</option>
+				  <select class="form-select" id="productCategory">
+					  <option value="Electronics">Electronics</option>
+					  <option value="Fashion">Fashion</option>
+					  <option value="Beverages">Beverages</option>
+					  <option value="Sports">Sports</option>
+					  <option value="Tools">Tools</option>
+					  <option value="Others">Others</option>
 					</select>
 					</div>
 
@@ -40,7 +41,7 @@
 				    <label for="karmasOffered" class="form-label">Karmas Offered</label>
 				    <input type="text" class="form-control" id="karmasOffered">
 				  </div>
-				  <button type="submit" class="btn btn-primary">Submit</button>
+				  <button class="btn btn-primary" onclick()="function()">Submit</button>
 				</form>
 
 			</div>
@@ -52,6 +53,69 @@
 	<div class="col-md-3"></div>
 </div>
 
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+   <script type="text/javascript">
+      
+        $(function() {
+        	$('button').click(function(e){
+      e.preventDefault();
+
+        			let prod=document.getElementById('productName').value;
+					let categ=document.getElementById('productCategory').value;
+					let descp=document.getElementById('productDescription').value;
+					let loc=document.getElementById('location').value;
+					let karma_offered=document.getElementById('karmasOffered').value;
+					if(prod == "" || categ == "" || descp == "" || loc == "" || karma_offered == "" || prod == " " || categ == " " || descp == " " || loc == " " || karma_offered == " ")
+					{
+						swal("Data Invalid","Please Fill All The Fields, Amigo","error");
+					}
+					 else
+					 {
+					 var prod_data=[
+					 {'prod' : prod,
+					 	'categ' : categ,
+					 	'descp' : descp,
+					 	'loc' : loc,
+					 	'karma_offered' : karma_offered
+						}
+					 ];
+
+					$.ajax(
+						{
+							type: "POST",
+							url: "./borrows",
+							data : JSON.stringify(prod_data),
+							contentType : "application/json",
+							dataType : 'json',
+							success : function(resp) {
+								console.log("Result-->>",resp); 
+								if(resp[1]=="prod_exists")
+								{
+									swal("Request Already Exists","","info").then(function() {
+   									 window.location = "./ToBorrow";});
+								}
+								else if(resp[1] == "less_karma")	 		 	
+								{
+									swal("Oops, Low in karma","Increase karma By Helping the Need","error").then(function() {
+   									 window.location = "./HomeFeed";});
+								}
+								else
+								{
+									swal("Request Posted Successfully","","success").then(function() {
+   									 window.location = "./HomeFeed";});
+								}
+							},
+							error : function(err) {
+								console.log("Error-->>",err);
+
+							}
+						}
+					);
+				}
+				});
+        });
+
+    </script>
 
 
 

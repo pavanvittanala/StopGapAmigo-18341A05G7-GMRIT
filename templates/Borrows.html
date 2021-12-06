@@ -10,13 +10,15 @@
           <h3 class="card-title">{{ item["name"] }}</h3>
           <hr/>
           <p class="card-text">{{ item["description"] }}</p>
+          <p class="card-text" id={{ item.unqid }}></p>
           <div class="tags">
             <div class="info-tags">
             <div><span class="badge bg-info"><b>Category:</b> {{ item["category"] }}</span>&nbsp;</div>
             <div><span class="badge bg-info"><b>Location:</b> {{ item["location"] }}</span>&nbsp;</div>
             <div><span class="badge bg-info"><b>Karmas:</b> {{ item["tender"] }}</span></div>
             </div>
-            <div><button class="btn btn-primary lend-btn">Lend</button></div>
+            <div><button class="btn btn-primary lend-btn" onclick="myDelete({{ item.unqid }})">Delete</button></div>
+            <div><button class="btn btn-primary lend-btn" id={{ item.unqid }} onclick()="function()">Show Status</button></div>
 
           </div>
         </div>
@@ -27,4 +29,80 @@
   <div class="col-md-3"></div>
 </div>
 
+  <script type="text/javascript">
+      function myDelete(unqid) {
+        
+        .ajax(
+            {
+              type: "POST",
+              url: "./deleteBorrow",
+              data : JSON.stringify([{'unqid':unqid}]),
+              contentType : "application/json",
+              dataType : 'json',
+              success : function(resp) {
+                console.log("Result-->>",resp); 
+                if(resp[1] == "fail")
+                {
+                  document.getElementById(val).innerHTML="Open";
+                }
+                else if(resp[1] == "pending")
+                {
+                 document.getElementById(val).innerHTML="Lended"; 
+                }
+                else{
+
+                  document.getElementById(val).innerHTML="Returned";
+                }
+                
+              },
+              error : function(err) {
+                console.log("Error-->>",err);
+
+              }
+            }
+          );
+
+      }
+
+      $(function() {
+    $('button').click(function(e){
+      // e.preventDefault();
+      console.log(this.id);
+      let val=this.id;
+
+      $.ajax(
+            {
+              type: "POST",
+              url: "./borrow_status",
+              data : JSON.stringify([{'unqid':val}]),
+              contentType : "application/json",
+              dataType : 'json',
+              success : function(resp) {
+                console.log("Result-->>",resp); 
+                if(resp[1] == "fail")
+                {
+                  document.getElementById(val).innerHTML="Open";
+                }
+                else if(resp[1] == "pending")
+                {
+                 document.getElementById(val).innerHTML="Lended"; 
+                }
+                else{
+
+                  document.getElementById(val).innerHTML="Returned";
+                }
+                
+              },
+              error : function(err) {
+                console.log("Error-->>",err);
+
+              }
+            }
+          );
+
+    });
+  });
+      
+
+  </script>
 {% endblock %}

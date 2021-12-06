@@ -131,7 +131,7 @@ def toLend():
 	return render_template("ToLendForm.html")
 
 
-@app.route('/Borrows')
+@app.route('/MyBorrows')
 def Borrow_Individual():
 	cur=mysql.new_cursor(dictionary=True)
 	E="SELECT * from borrows where mailid='{0}';".format(session['user'])
@@ -141,7 +141,7 @@ def Borrow_Individual():
 	print(data)
 	return render_template('Borrows.html', catalogue=data)
 
-@app.route('/Lends')
+@app.route('/MyLends')
 def Lend_Individual():
 	cur=mysql.new_cursor(dictionary=True)
 	E="SELECT * from lends where mailid='{0}';".format(session['user'])
@@ -151,7 +151,15 @@ def Lend_Individual():
 	print(data)
 	return render_template('Lends.html', catalogue=data)
 
-
+@app.route('/Amigos')
+def Amigo():
+	cur=mysql.new_cursor(dictionary=True)
+	E="SELECT * from amigos where from_user='{0}' or to_user='{0}';".format(session['user'])
+	cur.execute(E)
+	data=cur.fetchall()
+	cur.close()
+	print(data)
+	return render_template('Amigos.html',catalogue=data)
 
 
 
@@ -159,32 +167,23 @@ def Lend_Individual():
 @app.route('/lends',methods=['GET','POST'])
 def lender():
 	if request.method == 'POST':
-		mail=request.form['email']
-		if session:
-			if session['user'] != mail:
-				session['user'] = mail
-		E="SELECT fullname from userdetails where mailid='{0}';".format(mail)
+		dt=request.get_json()
+		dt=dt[0]
+		E="SELECT unqid from lends where mailid='{0}' and name='{1}' and description='{2}' and location='{3}' and category='{4}';".format(session['user'],dt['prod'],dt['descp'],dt['loc'],dt['categ'])
 		cur=mysql.new_cursor(dictionary=True)
 		cur.execute(E)
-		output=cur.fetchall()
+		data=cur.fetchall()
 		cur.close()
-		if output:
-			fullname = output[0]['fullname']
-		else:
-			fullname = request.form['name']
-		category=request.form['category']
-		location=request.form['location']
-		descp=request.form['description']
+		if data:
+			return jsonify({1:"prod_exists"})
 		cur=mysql.new_cursor(dictionary=True)
-		E="INSERT INTO lends (name,mailid,location,category,description) VALUES ('{0}','{1}','{2}','{3}','{4}');".format(fullname,mail,location,category,descp)
+		E="INSERT INTO lends (name,mailid,location,category,description) VALUES ('{0}','{1}','{2}','{3}','{4}');".format(dt['prod'],session['user'],dt['loc'],dt['categ'],dt['descp'])
 		cur.execute(E)
 		mysql.connection.commit()
 		data=cur.fetchall()
+		cur.close()
 		print(data)
-		if data:
-			return jsonify({1:"success"})
-		else:
-			return jsonify({0:"failed"})
+		return jsonify({1:"success"})
 			
 
 
@@ -193,38 +192,27 @@ def lender():
 
 
 
-@app.route('/borrows',methods=['GET','POST'])
+@app.route('/borrows',methods=['POST'])
 def borrower():
 	if request.method == 'POST':
-		mail=request.form['email']
-		if session:
-			if session['user'] != mail:
-				session['user'] = mail
-		E="SELECT fullname from userdetails where mailid='{0}';".format(mail)
-		cur=mysql.new_cursor(dictionary=True)
-		cur.execute(E)
-		output=cur.fetchall()
-		cur.close()
-		if output:
-			fullname = output[0]['fullname']
-		else:
-			fullname = request.form['name']
-		category=request.form['category']
-		location=request.form['location']
-		descp=request.form['description']
-		karmas=request.form['points']
-		E="SELECT * from borrows where mailid='{0}' and name='{1}';".format(mail,fullname)
+		dt=request.get_json()
+		dt=dt[0]
+		E="SELECT unqid from borrows where mailid='{0}' and name='{1}' and description='{2}' and location='{3}' and category='{4}' and tender = '{5}';".format(session['user'],dt['prod'],dt['descp'],dt['loc'],dt['categ'],dt['karma_offered'])
 		cur=mysql.new_cursor(dictionary=True)
 		cur.execute(E)
 		data=cur.fetchall()
 		cur.close()
 		if data:
-			return jsonify({1:"exists"})
+			return jsonify({1:"prod_exists"})
+		print("karma",session['karma'])
+		if int(dt['karma_offered']) > int(session['karma']):
+			return jsonify({1:"less_karma"})
 		cur=mysql.new_cursor(dictionary=True)
-		E="INSERT INTO borrows (name,mailid,location,category,description,tender) VALUES ('{0}','{1}','{2}','{3}','{4}'.'{5}');".format(fullname,mail,location,category,descp,karma)
+		E="INSERT INTO borrows (name,mailid,location,category,description,tender) VALUES ('{0}','{1}','{2}','{3}','{4}','{5}');".format(dt['prod'],session['user'],dt['loc'],dt['categ'],dt['descp'],dt['karma_offered'])
 		cur.execute(E)
 		mysql.connection.commit()
 		data=cur.fetchall()
+		cur.close()
 		print(data)
 		return jsonify({1:"success"})
 
@@ -247,15 +235,24 @@ def borrower_returned():
 	data=data[0]
 	cur.close()
 	if int(session['karma']) < int(data['tender']):
-		return jsonify({1:"failed"})
+		return jsonify({1:"failed1"})
 	print("data",data)
-	E="INSERT INTO amigos (name,from_user,to_user,status,karmaoffered) VALUES ('{0}','{1}','{2}','{3}','{4}');".format(data['name'],session['user'],data['mailid'],"pending",data['tender'])
+
+
+	E="DELETE from borrows where unqid='{0}'".format(dt)
+	cur=mysql.new_cursor(dictionary=True)
+	cur.execute(E)
+	mysql.connection.commit()
+	cur.close()
+
+
+	E="INSERT INTO amigos (name,from_user,to_user,status,karmaoffered,idofborrower) VALUES ('{0}','{1}','{2}','{3}','{4}');".format(data['name'],session['user'],data['mailid'],"pending",data['tender'],dt)
 	cur=mysql.new_cursor(dictionary=True)
 	cur.execute(E)
 	mysql.connection.commit()
 	cur.close()
 	karma_update= abs(int(session['karma']) + int(data['tender']))
-
+	session['karma']=str(karma_update)
 	E=f"select karma from userdetails where mailid='{ data['mailid'] }';"
 	cur=mysql.new_cursor(dictionary=True)
 	cur.execute(E)
@@ -263,6 +260,11 @@ def borrower_returned():
 	# print("kk",kk)
 	kk=kk[0]['karma']
 	cur.close()
+
+	karma_update = int(kk) - int(data['tender'])
+	if karma_update<0:
+		return jsonify({1:"failed2"})
+
 
 	E=f"UPDATE userdetails SET karma = '{karma_update}' where mailid='{session['user']}';"
 	cur=mysql.new_cursor(dictionary=True)
@@ -272,7 +274,7 @@ def borrower_returned():
 	cur.close()
 	print(data['tender'])
 
-	karma_update = abs(int(kk) - int(data['tender']))
+	
 	print("kkkkkkkk",karma_update,data)
 	E=f"UPDATE userdetails SET karma = '{str(karma_update)}' where mailid='{data['mailid']}';"
 	cur=mysql.new_cursor(dictionary=True)
@@ -281,6 +283,35 @@ def borrower_returned():
 	cur.close()
 
 	return jsonify({1:"success"})
+
+
+
+
+
+
+@app.route('/borrow_status',methods=['POST'])
+def status():
+	dt=request.get_json()
+	dt=dt[0]
+	cur=mysql.new_cursor(dictionary=True)
+	E="SELECT * from borrows where to_user='{0}' and idofborrower='{1}';".format(dt['unqid'])
+	cur.execute(E)
+	data=cur.fetchall()
+	cur.close()
+	print(data)
+	if data:
+		data=data[0]
+		return jsonify({1:data['status']})
+	else:
+		return jsonify({1:"fail"})
+@app.route('/deleteBorrow',methods=['POST'])
+def deleteBorrow():
+
+
+
+
+
+
 
 
 
