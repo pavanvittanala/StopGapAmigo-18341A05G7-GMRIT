@@ -144,12 +144,22 @@ def Borrow_Individual():
 @app.route('/MyLends')
 def Lend_Individual():
 	cur=mysql.new_cursor(dictionary=True)
-	E="SELECT * from lends where mailid='{0}';".format(session['user'])
+	E="SELECT * from amigos where from_user='{0}';".format(session['user'])
 	cur.execute(E)
 	data=cur.fetchall()
 	cur.close()
 	print(data)
 	return render_template('Lends.html', catalogue=data)
+
+@app.route('/MyLendStuff')
+def LendStuff():
+	cur=mysql.new_cursor(dictionary=True)
+	E="SELECT * from lends where mailid='{0}';".format(session['user'])
+	cur.execute(E)
+	data=cur.fetchall()
+	cur.close()
+	print(data)
+	return render_template('LendStuff.html', catalogue=data)
 
 @app.route('/Amigos')
 def Amigo():
@@ -239,6 +249,23 @@ def borrower_returned():
 	print("data",data)
 
 
+	E=f"select karma from userdetails where mailid='{ data['mailid'] }';"
+	cur=mysql.new_cursor(dictionary=True)
+	cur.execute(E)
+	kk=cur.fetchall()
+	kk=kk[0]['karma']
+	cur.close()
+
+
+	karma_update = int(kk) - int(data['tender'])
+	if karma_update<0:
+		return jsonify({1:"failed2"})
+	E=f"UPDATE userdetails SET karma = '{str(karma_update)}' where mailid='{data['mailid']}';"
+	cur=mysql.new_cursor(dictionary=True)
+	cur.execute(E)
+	mysql.connection.commit()
+	cur.close()
+
 	E="DELETE from borrows where unqid='{0}'".format(dt)
 	cur=mysql.new_cursor(dictionary=True)
 	cur.execute(E)
@@ -246,41 +273,21 @@ def borrower_returned():
 	cur.close()
 
 
-	E="INSERT INTO amigos (name,from_user,to_user,status,karmaoffered,idofborrower) VALUES ('{0}','{1}','{2}','{3}','{4}');".format(data['name'],session['user'],data['mailid'],"pending",data['tender'],dt)
+	E="INSERT INTO amigos (name,from_user,to_user,status,karmaoffered,idofborrower,location,category) VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}');".format(data['name'],session['user'],data['mailid'],"pending",data['tender'],dt,data['location'],data['category'])
 	cur=mysql.new_cursor(dictionary=True)
 	cur.execute(E)
 	mysql.connection.commit()
 	cur.close()
-	karma_update= abs(int(session['karma']) + int(data['tender']))
+
+
+	karma_update= int(session['karma']) + int(data['tender'])
 	session['karma']=str(karma_update)
-	E=f"select karma from userdetails where mailid='{ data['mailid'] }';"
-	cur=mysql.new_cursor(dictionary=True)
-	cur.execute(E)
-	kk=cur.fetchall()
-	# print("kk",kk)
-	kk=kk[0]['karma']
-	cur.close()
-
-	karma_update = int(kk) - int(data['tender'])
-	if karma_update<0:
-		return jsonify({1:"failed2"})
-
-
 	E=f"UPDATE userdetails SET karma = '{karma_update}' where mailid='{session['user']}';"
 	cur=mysql.new_cursor(dictionary=True)
 	cur.execute(E)
 	mysql.connection.commit()
-	# print("fetchhh",cur.fetchall())
 	cur.close()
-	print(data['tender'])
 
-	
-	print("kkkkkkkk",karma_update,data)
-	E=f"UPDATE userdetails SET karma = '{str(karma_update)}' where mailid='{data['mailid']}';"
-	cur=mysql.new_cursor(dictionary=True)
-	cur.execute(E)
-	mysql.connection.commit()
-	cur.close()
 
 	return jsonify({1:"success"})
 
@@ -292,9 +299,11 @@ def borrower_returned():
 @app.route('/borrow_status',methods=['POST'])
 def status():
 	dt=request.get_json()
-	dt=dt[0]
+	if 'amigo' in dt[1]:
+		E="SELECT status from amigos where from_user = '{0}' OR to_user = '{0}';".format(session['user'])
+	else:
+		E="SELECT status from amigos where from_user = '{0}'OR to_user = '{0}';".format(session['user'])
 	cur=mysql.new_cursor(dictionary=True)
-	E="SELECT * from borrows where to_user='{0}' and idofborrower='{1}';".format(dt['unqid'])
 	cur.execute(E)
 	data=cur.fetchall()
 	cur.close()
@@ -304,12 +313,54 @@ def status():
 		return jsonify({1:data['status']})
 	else:
 		return jsonify({1:"fail"})
+
+
+
 @app.route('/deleteBorrow',methods=['POST'])
 def deleteBorrow():
+	dt=request.get_json()
+	dt=dt[0]
+	cur=mysql.new_cursor(dictionary=True)
+	E="DELETE from borrows where mailid='{0}' and unqid='{1}';".format(session['user'],dt['unqid'])
+	cur.execute(E)
+	mysql.connection.commit()
+	data=cur.fetchall()
+	cur.close()
+	print(data)
+	return jsonify({1:"success"})
 
 
 
 
+@app.route('/deleteLendStuff',methods=['POST'])
+def deleteStuff():
+	dt=request.get_json()
+	dt=dt[0]
+	cur=mysql.new_cursor(dictionary=True)
+	E="DELETE from lends where mailid='{0}' and unqid='{1}';".format(session['user'],dt['unqid'])
+	cur.execute(E)
+	mysql.connection.commit()
+	data=cur.fetchall()
+	cur.close()
+	print(data)
+	return jsonify({1:"success"})
+
+
+
+
+@app.route('/mark_returned',methods=['POST'])
+def change_status():
+	dt=request.get_json()
+	dt=dt[0]
+	print(dt['unqid'],session['user'])
+	E="UPDATE amigos SET status = '{0}' WHERE from_user = '{1}' AND name = '{2}';".format("returned",session['user'],dt['unqid'])
+	cur=mysql.new_cursor(dictionary=True)
+	cur.execute(E)
+	mysql.connection.commit()
+	data=cur.fetchall()
+	cur.close()
+	print(data)
+	return jsonify({1:"success"})
 
 
 
@@ -324,7 +375,7 @@ def curKarms():
 	data=cur.fetchall()
 	cur.close()
 	session['karma']=data[0]['karma']
-	return jsonify({1:data[0]['karma']})
+	return jsonify({1:data[0]['karma'],2:session['user']})
 
 
 

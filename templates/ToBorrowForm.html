@@ -1,4 +1,4 @@
-{% extends 'Home Feed.html' %}
+{% extends 'Home Nav.html' %}
 {% block content %}
 
 
@@ -54,6 +54,13 @@
 </div>
 
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+		<script>
+		  function recordData (data) {
+		    console.log(data.city+" "+data.country)
+		    document.getElementById('location').value = data.city+", "+data.country;
+		  }
+				</script>
+		<script src="https://ipinfo.io/json?token=15f59f95bfbcd7&callback=recordData"></script>	
    <script type="text/javascript">
       
         $(function() {

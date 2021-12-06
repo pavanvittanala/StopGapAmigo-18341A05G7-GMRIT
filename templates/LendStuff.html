@@ -8,7 +8,7 @@
         $.ajax(
             {
               type: "POST",
-              url: "./deleteBorrow",
+              url: "./deleteLendStuff",
               data : JSON.stringify([{'unqid':unqid}]),
               contentType : "application/json",
               dataType : 'json',
@@ -16,7 +16,13 @@
                 console.log("Result-->>",resp); 
                 if(resp[1] == "success")
                 {
-                  swal("Borrow request has been deleted","","success");
+                  swal("Lend Stuff request has been deleted","","success");
+                  for(let i=1;i<2;i++)
+                  {
+                    setTimeout(function timer() {
+                      window.location.href="MyLendStuff";
+                    }, i*1200);
+                  }
                 }
               },
               error : function(err) {
@@ -48,8 +54,6 @@
             <div><span class="badge bg-info"><b>Karmas:</b> {{ item["tender"] }}</span></div>
             </div>
             <div><button class="btn btn-primary lend-btn" onclick="myDelete({{ item.unqid }})">Delete</button></div>
-            <div><button class="btn btn-primary btn-xl" id={{ item.unqid }} onclick="myfunction({{ item.unqid }} )">Show Status</button></div>
-
           </div>
         </div>
       </div>
@@ -71,48 +75,7 @@
 </div>
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
-  <script type="text/javascript">
-      
 
-      function myfunction(val) {
-    // $('button').click(function(e){
-      // e.preventDefault();
-      // console.log(this.id);
-      // let val=this.id;
 
-      $.ajax(
-            {
-              type: "POST",
-              url: "./borrow_status",
-              data : JSON.stringify([{'unqid':val}]),
-              contentType : "application/json",
-              dataType : 'json',
-              success : function(resp) {
-                console.log("Result-->>",resp); 
-                if(resp[1] == "fail")
-                {
-                  document.getElementById(val).innerHTML="Open";
-                }
-                else if(resp[1] == "pending")
-                {
-                 document.getElementById(val).innerHTML="Lended"; 
-                }
-                else{
 
-                  document.getElementById(val).innerHTML="Returned";
-                }
-                
-              },
-              error : function(err) {
-                console.log("Error-->>",err);
-
-              }
-            }
-          );
-
-    // });
-  };
-      
-
-  </script>
 {% endblock %}

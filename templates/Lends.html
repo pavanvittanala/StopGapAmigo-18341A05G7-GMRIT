@@ -1,27 +1,72 @@
-{% extends 'Home Feed.html' %}
+{% extends 'Home Nav.html' %}
 {% block content %}
 
 <div class="row">
   <div class="col-md-3"></div>
   <div class="col-md-6">
+    {% if catalogue is defined and catalogue[0] is defined  %}
     {% for item in catalogue %}
       <div class="card">
         <div class="card-body">
           <h3 class="card-title">{{ item["name"] }}</h3>
           <hr/>
-          <p class="card-text">{{ item["description"] }}</p>
+          <p class="card-text">{{ item["status"] }}</p>
           <div class="tags">
             <div class="info-tags">
             <div><span class="badge bg-info"><b>Category:</b> {{ item["category"] }}</span>&nbsp;</div>
             <div><span class="badge bg-info"><b>Location:</b> {{ item["location"] }}</span>&nbsp;</div>
             </div>
+            {% if item.status =="pending" %}
+            <div><button class="btn btn-primary btn-xl" id="{{ item.idofborrower }}" onclick="myfunction('{{item.name}}')" >Mark Returned</button></div>
+            {% endif %}
+
           </div>
         </div>
       </div>
     <br/>
     {% endfor %}
+    {% else %}
+
+        <div class="card">
+        <div class="card-body">
+
+              <p class="card-text">No data to Show</p>
+
+        </div>
+      </div>
+
+    {% endif %}
   </div>
   <div class="col-md-3"></div>
 </div>
+
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+
+
+  <script type="text/javascript">
+    
+      function myfunction(val) {
+        console.log(typeof val)
+      $.ajax(
+            {
+              type: "POST",
+              url: "./mark_returned",
+              data : JSON.stringify([{'unqid':val}]),
+              contentType : "application/json",
+              dataType : 'json',
+              success : function(resp) {
+                console.log("Result-->>",resp); 
+                swal("Item Marked As Returned","","success");                
+              },
+              error : function(err) {
+                console.log("Error-->>",err);
+
+              }
+            }
+          );
+  };
+  </script>
+  
 
 {% endblock %}

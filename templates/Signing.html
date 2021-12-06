@@ -7,6 +7,9 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='./styles/style1.css') }}">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+			
+
+
 <body >
 
 
@@ -25,11 +28,11 @@
 
             <form class="form register-form" id="register-form">
 
-                <input class="form-control" type="text" name="name" placeholder="Name">
-                <input class="form-control" type="email" name="email" placeholder="Email" onchange="validateEmail(this.value)"> 
-                <input class="form-control" type="password" name="passcode" placeholder="Password"> 
-                <input class="form-control" type="text" name="location" placeholder="Location"> 
-                <input class="form-control" type="text" name="phno" placeholder="Phone Number"> 
+                <input class="form-control" type="text" name="name" placeholder="Name" required>
+                <input class="form-control" type="email" name="email" placeholder="Email" onchange="validateEmail(this.value)" required> 
+                <input class="form-control" type="password" name="passcode" placeholder="Password" required> 
+                <input class="form-control" type="text" name="location" placeholder="Location" required> 
+                <input class="form-control" type="text" name="phno" placeholder="Phone Number" required> 
                 
                 <button class="btn btn-primary" id = "1" onclick()="function(this.id)">Sign Up</b></button>
 
@@ -37,8 +40,8 @@
 
             <form class="form login-form" id="login-form">
 
-                <input class="form-control" type="email" name="email" placeholder="Email"> 
-                <input class="form-control" type="password" name="passcode" placeholder="Password"> 
+                <input class="form-control" type="email" name="email" placeholder="Email" required> 
+                <input class="form-control" type="password" name="passcode" placeholder="Password" required> 
                 
                 <button class="btn btn-primary" id="2" onclick()="function(this.id)"><b>Log In</b></button>
 
@@ -51,6 +54,14 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 	<script src="{{ url_for('static',filename='/js/js1.js') }}"></script>
 	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+		<script>
+		  function recordData (data) {
+		    console.log(data.city+" "+data.country)
+		    document.getElementsByName('location')[0].value = data.city+", "+data.country;
+		  }
+				</script>
+		<script src="https://ipinfo.io/json?token=15f59f95bfbcd7&callback=recordData"></script>	
 
 	<script type="text/javascript">
 		
@@ -68,6 +79,7 @@
 							dataType : 'json',
 							success : function(resp) {
 								console.log("Result-->>",resp); 
+
 								if(resp[1]=="exists")
 								{
 									swal("User already Exists","","info");
@@ -97,7 +109,14 @@
 					let ps=document.getElementsByName('passcode')[0].value;
 					let lc=document.getElementsByName('location')[0].value;
 					let ph=document.getElementsByName('phno')[0].value;
-					 
+					
+
+					if(nm == "" || ml == "" || ps == "" || lc == "" || ph == "")
+					{
+						swal("Data Invalid","Please Fill All The Fields, Amigo","error");
+					}
+					else
+					 {
 					 var log_data=[
 					 {'name':nm},
 					 {'email':ml},
@@ -118,6 +137,16 @@
 								if(resp[1]=="exists")
 								{
 									swal("User already Exists","","error");
+								}
+								else
+								{
+									swal("Registered Successfully","","success");
+									for(let i=1;i<2;i++)
+									{
+										setTimeout(function timer() {
+											window.location.href="signing";
+										}, i*1200);
+									}
 								}	 		 	
 							},
 							error : function(err) {
@@ -126,12 +155,19 @@
 							}
 						}
 					);
+				}
 
 	    }
 	    else{
 				    let ml=document.getElementsByName('email')[1].value;
 					let ps=document.getElementsByName('passcode')[1].value;
 					 console.log(ml,ps);
+					 if(ml == "" || ps == "")
+					{
+						swal("Data Invalid","Please Fill All The Fields, Amigo","error");
+					}
+					else
+					 {
 					 
 					 var log_data=[
 					 {'email':ml},
@@ -154,7 +190,7 @@
 									{
 										setTimeout(function timer() {
 											window.location.href="HomeFeed";
-										}, i*3000);
+										}, i*1000);
 									}
 									
 								}	
@@ -168,6 +204,7 @@
 							}
 						}
 					);
+				}
 			}
 
 		});

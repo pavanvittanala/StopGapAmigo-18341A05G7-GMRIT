@@ -1,10 +1,11 @@
-{% extends 'Home Feed.html' %}
+{% extends 'Home Nav.html' %}
 {% block content %}
 
 
 <div class="row">
   <div class="col-md-3"></div>
   <div class="col-md-6">
+    {% if catalogue is defined and catalogue[0] is defined  %}
     {% for item in catalogue %}
       <div class="card">
         <div class="card-body">
@@ -18,13 +19,24 @@
             <div><span class="badge bg-info"><b>Location:</b> {{ item.location }}</span>&nbsp;</div>
             <div><span class="badge bg-info"><b>Karmas:</b> {{ item.tender }}</span></div>
             </div>
-            <div><button class="btn btn-primary lend-btn" id=" {{ item.unqid }} " onclick()="function(this.id)">Lend</button></div>
+            <div><button class="btn btn-primary btn-xl" id=" {{ item.unqid }} " onclick()="function(this.id)">Lend</button></div>
 
           </div>
         </div>
       </div>
     <br/>
     {% endfor %}
+    {% else %}
+
+        <div class="card">
+        <div class="card-body">
+
+              <p class="card-text">No data to Show</p>
+
+        </div>
+      </div>
+
+    {% endif %}
   </div>
   <div class="col-md-3"></div>
 </div>
@@ -54,6 +66,12 @@
                 if(resp[1]=="success")    
                 {
                 	swal("Olah,You helped your friend","","success");
+                  for(let i=1;i<2;i++)
+                  {
+                    setTimeout(function timer() {
+                      window.location.href="HomeFeed";
+                    }, i*1200);
+                  }
                 }
                 else if(resp[1] == "failed1")
                 {
